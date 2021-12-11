@@ -256,3 +256,31 @@ class resImgMT(resImgLips):
     def __init__(self):
         self.experiment_fn = 'restrictedImgnet'
         self.grid_params[0]['attack'].append('multitarget')
+
+class mnistLip(ExpExperiments):
+    def __new__(cls, *args, **kwargs):
+        cls.name = "fashion_mnist"
+        cls.experiment_fn = 'experiment01'
+        grid_params = []
+        arch = "CNN001"
+        grid_params.append({
+            'dataset': ['fashion_mnist'],
+            'model': [
+                f'advbeta2ce-tor-{arch}',
+                f'advbetace-tor-{arch}',
+                f'advbeta.5ce-tor-{arch}',
+                f'strades6ce-tor-{arch}',
+                f'strades3ce-tor-{arch}',
+                f'stradesce-tor-{arch}',
+                f'tulipce-tor-{arch}',
+                f'ce-tor-{arch}',
+                f'advce-tor-{arch}',
+                f'sllrce-tor-{arch}',
+            ],
+            'eps': [0.1],
+            'norm': ['inf'],
+            'attack': ['pgd'],
+            'random_seed': random_seed,
+        })
+        cls.grid_params = grid_params
+        return ExpExperiments.__new__(cls, *args, **kwargs)
