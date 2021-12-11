@@ -81,3 +81,13 @@ class DatasetVarClass(VariableClass, metaclass=RegisteringChoiceType):
                 transforms.ToTensor(),
             ]))
         return trn_ds, tst_ds
+
+    @register_var(argument=r"fashion_mnist", shown_name="fashion mnist")
+    @staticmethod
+    def fashion_mnist(auto_var, var_value, inter_var):
+        from tensorflow.keras.datasets import fashion_mnist
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+        x_train, x_test = x_train[:, :, :, np.newaxis], x_test[:, :, :, np.newaxis]
+        x_train, x_test = x_train.astype(np.float32) / 255, x_test.astype(np.float32) / 255
+
+        return x_train, y_train, x_test, y_test
