@@ -26,8 +26,9 @@ auto_var = AutoVar(
     }
 )
 
-class NormVarClass(VariableClass, metaclass=RegisteringChoiceType):
+class NormVarClass(VariableClass):
     """Defines which distance measure to use for attack."""
+    __metaclass__ = RegisteringChoiceType
     var_name = "norm"
 
     @register_var()

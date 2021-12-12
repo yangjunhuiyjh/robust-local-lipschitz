@@ -14,7 +14,7 @@ models=(
 for i in "${models[@]}"
 do
     python ./main.py --experiment experiment01 \
-        --no-hooks 
+        --no-hooks \
         --norm inf --eps 0.1 \
         --dataset fashion_mnist \
         --model ${i} \
