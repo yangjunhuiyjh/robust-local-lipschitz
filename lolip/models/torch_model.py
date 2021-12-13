@@ -67,6 +67,8 @@ class TorchModel(BaseEstimator):
         self.tst_ds = None
         self.start_epoch = 1
 
+        self.metric = 0
+
         ### Attack ####
         self.eps = eps
         self.norm = norm
@@ -246,7 +248,7 @@ class TorchModel(BaseEstimator):
                             callback_fn(self, x, y, loss_fn)
 
             current_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
-            scheduler.step()
+            scheduler.step(self.metric)
             self.start_epoch = epoch
 
             if (epoch - 1) % log_interval == 0:
