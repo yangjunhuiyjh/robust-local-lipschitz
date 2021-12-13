@@ -11,7 +11,7 @@ from torchvision.datasets import VisionDataset
 
 import numpy as np
 from sklearn.base import BaseEstimator
-from .torch_utils import get_optimizer, get_loss, get_scheduler, CustomTensorDataset
+from .torch_utils import get_optimizer, get_loss, get_smart_scheduler, CustomTensorDataset
 from .torch_utils.archs import *
 from ..attacks.torch.projected_gradient_descent import projected_gradient_descent
 from .torch_utils.trades import trades_loss
@@ -106,7 +106,7 @@ class TorchModel(BaseEstimator):
             loss_fn = get_loss(self.loss_name, reduction="none")
         else:
             loss_fn = get_loss(self.loss_name, reduction="sum")
-        scheduler = get_scheduler(self.optimizer, n_epochs=self.epochs, loss_name=self.loss_name)
+        scheduler = get_smart_scheduler(self.optimizer, min_lr=self.learning_rate*0.001)
 
         train_loader = torch.utils.data.DataLoader(dataset,
             batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
@@ -122,6 +122,7 @@ class TorchModel(BaseEstimator):
             test_loader = torch.utils.data.DataLoader(ts_dataset,
                 batch_size=32, shuffle=False, num_workers=self.num_workers)
 
+        patience = 3
         for epoch in range(self.start_epoch, self.epochs+1):
             train_loss = 0.
             train_acc = 0.

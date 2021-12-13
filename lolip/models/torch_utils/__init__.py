@@ -3,7 +3,7 @@ from torch import optim
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
-from torch.optim.lr_scheduler import MultiStepLR
+from torch.optim.lr_scheduler import MultiStepLR, ReduceLROnPlateau
 
 from .optimizer_nadam import Nadam
 
@@ -88,3 +88,6 @@ def get_scheduler(optimizer, n_epochs: int, loss_name=None):
     else:
         scheduler = scheduler(optimizer, milestones=[60, 100, 140, 180], gamma=0.1)
     return scheduler
+
+def get_smart_scheduler(optimizer, min_lr):
+    return ReduceLROnPlateau(optimizer, min_lr=min_lr, patience=3)
