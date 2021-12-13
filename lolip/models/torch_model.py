@@ -29,15 +29,14 @@ class TorchModel(BaseEstimator):
                 multigpu=False, dataaug=None, device=None, num_workers=4, trn_log_callbacks=None):
         print(f'lr: {learning_rate}, opt: {optimizer}, loss: {loss_name}, '
               f'arch: {architecture}, dataaug: {dataaug}, batch_size: {batch_size}, '
-              f'momentum: {momentum}, weight_decay: {weight_decay}, eps: {eps}, '
-              f'epochs: {epochs}')
+              f'momentum: {momentum}, weight_decay: {weight_decay}, eps: {eps}')
         self.num_workers = num_workers
         self.n_features = n_features
         self.n_classes = n_classes
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.architecture = architecture
-        self.epochs = epochs
+        # self.epochs = epochs
         self.lbl_enc = lbl_enc
         self.loss_name = loss_name
         self.dataaug = dataaug
@@ -122,8 +121,10 @@ class TorchModel(BaseEstimator):
             test_loader = torch.utils.data.DataLoader(ts_dataset,
                 batch_size=32, shuffle=False, num_workers=self.num_workers)
 
-        patience = 3
-        for epoch in range(self.start_epoch, self.epochs+1):
+        patience = 4
+        prev_test_loss = float("inf")
+        epoch = 1
+        while patience > 0:
             train_loss = 0.
             train_acc = 0.
             for x, y in tqdm(train_loader, desc=f"Epoch {epoch}"):
@@ -257,8 +258,8 @@ class TorchModel(BaseEstimator):
                     'trn_loss': train_loss / len(train_loader.dataset),
                     'trn_acc': train_acc / len(train_loader.dataset),
                 })
-                print('epoch: {}/{}, train loss: {:.3f}, train acc: {:.3f}'.format(
-                    epoch, self.epochs, history[-1]['trn_loss'], history[-1]['trn_acc']))
+                print('epoch: {}, train loss: {:.3f}, train acc: {:.3f}'.format(
+                    epoch, history[-1]['trn_loss'], history[-1]['trn_acc']))
 
                 if self.tst_ds is not None:
                     tst_loss, tst_acc = 0., 0.
@@ -276,6 +277,12 @@ class TorchModel(BaseEstimator):
                     history[-1]['tst_acc'] = tst_acc / len(test_loader.dataset)
                     print('             test loss: {:.3f}, test acc: {:.3f}'.format(
                           history[-1]['tst_loss'], history[-1]['tst_acc']))
+
+                    if history[-1]['tst_loss'] > prev_test_loss:
+                        patience -= 1
+                    else:
+                        patience = 4
+                    prev_test_loss = history[-1]['tst_loss']
 
         if test_loader is not None:
             del test_loader
