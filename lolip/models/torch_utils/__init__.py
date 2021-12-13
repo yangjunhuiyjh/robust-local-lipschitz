@@ -90,4 +90,4 @@ def get_scheduler(optimizer, n_epochs: int, loss_name=None):
     return scheduler
 
 def get_smart_scheduler(optimizer, min_lr):
-    return ReduceLROnPlateau(optimizer, min_lr=min_lr, patience=3)
+    return ReduceLROnPlateau(optimizer, min_lr=min_lr, patience=2)

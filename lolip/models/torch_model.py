@@ -105,7 +105,7 @@ class TorchModel(BaseEstimator):
             loss_fn = get_loss(self.loss_name, reduction="none")
         else:
             loss_fn = get_loss(self.loss_name, reduction="sum")
-        scheduler = get_smart_scheduler(self.optimizer, min_lr=self.learning_rate*0.001)
+        scheduler = get_smart_scheduler(self.optimizer, min_lr=self.learning_rate*0.01)
 
         train_loader = torch.utils.data.DataLoader(dataset,
             batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
@@ -121,10 +121,10 @@ class TorchModel(BaseEstimator):
             test_loader = torch.utils.data.DataLoader(ts_dataset,
                 batch_size=32, shuffle=False, num_workers=self.num_workers)
 
-        patience = 4
+        patience = 3
         prev_test_loss = float("inf")
         epoch = 1
-        while patience > 0:
+        while patience > 0 and epoch <= 60:
             train_loss = 0.
             train_acc = 0.
             for x, y in tqdm(train_loader, desc=f"Epoch {epoch}"):
@@ -278,10 +278,10 @@ class TorchModel(BaseEstimator):
                     print('             test loss: {:.3f}, test acc: {:.3f}'.format(
                           history[-1]['tst_loss'], history[-1]['tst_acc']))
 
-                    if history[-1]['tst_loss'] > prev_test_loss:
+                    if current_lr == self.learning_rate*0.01 and history[-1]['tst_loss'] > prev_test_loss:
                         patience -= 1
                     else:
-                        patience = 4
+                        patience = 3
                     prev_test_loss = history[-1]['tst_loss']
 
         if test_loader is not None:
