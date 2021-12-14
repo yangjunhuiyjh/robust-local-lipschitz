@@ -121,7 +121,7 @@ class TorchModel(BaseEstimator):
             test_loader = torch.utils.data.DataLoader(ts_dataset,
                 batch_size=32, shuffle=False, num_workers=self.num_workers)
 
-        patience = 3
+        patience = 2
         prev_test_loss = float("inf")
         epoch = 1
         while patience > 0 and epoch <= 60:
@@ -277,10 +277,10 @@ class TorchModel(BaseEstimator):
                     print('             test loss: {:.3f}, test acc: {:.3f}'.format(
                           history[-1]['tst_loss'], history[-1]['tst_acc']))
 
-                    if current_lr == self.learning_rate*0.01 and history[-1]['tst_loss'] > prev_test_loss:
+                    if abs(current_lr - self.learning_rate*0.01) < 1e-6 and history[-1]['tst_loss'] >= prev_test_loss:
                         patience -= 1
                     else:
-                        patience = 3
+                        patience = 2
                     prev_test_loss = history[-1]['tst_loss']
 
             scheduler.step(prev_test_loss)
